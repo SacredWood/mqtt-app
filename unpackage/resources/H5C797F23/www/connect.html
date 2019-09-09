@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="en">
+
+	<head>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<meta http-equiv="X-UA-Compatible" content="ie=edge">
+		<title>连接</title>
+		<link rel="stylesheet" href="css/reset.css">
+		<script src="./js/alibabacloud-iot-device-sdk.js"></script>
+		<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/xterm@3.12.0/dist/xterm.css" />
+		<script src="https://cdn.jsdelivr.net/npm/xterm@3.12.0/dist/xterm.js"></script>
+		<!-- nes -->
+		<link href="https://fonts.googleapis.com/css?family=Press+Start+2P" rel="stylesheet">
+		<link href="https://unpkg.com/nes.css/css/nes.css" rel="stylesheet" />
+		<link href="css/control.css" rel="stylesheet" />
+		<script src="js/jquery-3.4.1.min.js"></script>
+		<style>
+			html,
+			body,
+			pre,
+			code,
+			kbd,
+			samp {
+				font-family: "font-family you want to use";
+				text-align: center;
+			}
+
+			.buts {
+				margin: 50px auto;
+			}
+		</style>
+	</head>
+
+	<body>
+		<div class="header">
+			<h1>连&nbsp;接</h1>
+			<img src="img/setting.png" alt="" onclick="setting()">
+		</div>
+		<div id="terminal"></div>
+		<div class="content">
+			<div class="chart"></div>
+			<div class="speed">
+				<p>车速</p>
+				<p id="speed" class="unit-km">0</p>
+			</div>
+			<div class="arrow">
+				<div>
+					<!-- <img src="img/arrow-top.png" id="btnTop" alt="" srcset="" onclick="runTop()"> -->
+					<img src="img/arrow-top.png" id="btnTop" alt="" srcset="">
+				</div>
+				<div class="center">
+					<div>
+						<!-- <img src="img/arrow-left.png" id="btnLeft" alt="" srcset="" onclick="runLeft()"> -->
+						<img src="img/arrow-left.png" id="btnLeft" alt="" srcset="">
+					</div>
+					<div class="stop">
+						<img src="img/stop.png" alt="" id="btnStop" srcset="" onclick="runStop()">
+						<!-- <img src="img/stop.png" alt="" id="btnStop" srcset=""> -->
+					</div>
+					<div>
+						<!-- <img src="img/arrow-right.png" id="btnRight" alt="" srcset="" onclick="runRight()"> -->
+						<img src="img/arrow-right.png" id="btnRight" alt="" srcset="">
+					</div>
+				</div>
+				<div>
+					<!-- <img src="img/arrow-bottom.png" id="btnBottom" alt="" srcset="" onclick="runBottom()"> -->
+					<img src="img/arrow-bottom.png" id="btnBottom" alt="" srcset="">
+				</div>
+			</div>
+			<div class="btn-set">
+				<div class="ring">
+					<div class="ring-l active"></div>
+				</div>
+				<button class="btn btn-l" onclick="btnL()">L</button>
+				<div class="ring">
+					<div class="ring-m"></div>
+				</div>
+				<button class="btn btn-m" onclick="btnM()">M</button>
+				<div class="ring">
+					<div class="ring-h"></div>
+				</div>
+				<button class="btn btn-h" onclick="btnH()">H</button>
+				
+			</div>
+		</div>
+		<div class="footer">
+		</div>
+		<script>
+			var term = new Terminal({
+				'drawBoldTextInBrightColors': true,
+				cols: 40,
+				rows: 20,
+				cursorBlink: true, // 光标闪烁
+				cursorStyle: "underline", // 光标样式  null | 'block' | 'underline' | 'bar'
+				scrollback: 100, //回滚
+				tabStopWidth: 2, //制表宽度
+				screenKeys: true,
+				ƬFontWeight: "100"
+			});
+			console.log = function(str) {
+				term.writeln(str)
+			}
+			term.open(document.getElementById('terminal'));
+			console.log('alibabacloud-iot-device-sdk,请连接后使用功能')
+
+			// const sdk_device = {
+			//   productKey: 'a16O8o13VKv',
+			//   deviceName: 'mqttapp',
+			//   deviceSecret: 'sTcYpB1s8gbuCCZV2sYuYHQBxzSmvNhK',
+			// }
+			const sdk_device = {
+				productKey: localStorage.getItem('$ProductKey'),
+				deviceName: localStorage.getItem('$DeviceName'),
+				deviceSecret: localStorage.getItem('$DeviceSecret'),
+			}
+
+			let Topic = `/${sdk_device.productKey}/${sdk_device.deviceName}/user/${localStorage.getItem('$Topic')}`
+			let device;
+			connect();
+			subscribe();
+			var self = this;
+			// 监听Top键长按
+			$("#btnTop").on({
+				touchstart: function(e) {
+					// console.log('touchstart')
+					timeOutEvent = setInterval(() => {
+						runTop();
+					}, 500);
+					// setTimeout(function () {
+					//   //此处为长按事件-----在此显示遮罩层及删除按钮
+					//   runTop();
+					// }, 500);
+				},
+				touchmove: function() {
+					clearTimeout(timeOutEvent);
+					timeOutEvent = 0;
+					e.preventDefault();
+					console.log('touchmove')
+				},
+				touchend: function(e) {
+					clearTimeout(timeOutEvent);
+					if (timeOutEvent != 0) { //点击
+						console.log('touchend')
+						runStop();
+					}
+					return false;
+				}
+			});
+			$("#btnRight").on({
+				touchstart: function(e) {
+					timeOutEvent = setInterval(() => {
+						runRight();
+					}, 500);
+				},
+				touchmove: function() {
+					clearTimeout(timeOutEvent);
+					timeOutEvent = 0;
+					e.preventDefault();
+					console.log('touchmove')
+				},
+				touchend: function(e) {
+					clearTimeout(timeOutEvent);
+					if (timeOutEvent != 0) { //点击
+						runStop();
+					}
+					return false;
+				}
+			});
+			$("#btnBottom").on({
+				touchstart: function(e) {
+					timeOutEvent = setInterval(() => {
+						runBottom();
+					}, 500);
+				},
+				touchmove: function() {
+					clearTimeout(timeOutEvent);
+					timeOutEvent = 0;
+					e.preventDefault();
+					console.log('touchmove')
+				},
+				touchend: function(e) {
+					clearTimeout(timeOutEvent);
+					if (timeOutEvent != 0) { //点击
+						runStop();
+					}
+					return false;
+				}
+			});
+			$("#btnLeft").on({
+				touchstart: function(e) {
+					timeOutEvent = setInterval(() => {
+						runLeft();
+					}, 500);
+				},
+				touchmove: function() {
+					clearTimeout(timeOutEvent);
+					timeOutEvent = 0;
+					e.preventDefault();
+					console.log('touchmove')
+				},
+				touchend: function(e) {
+					clearTimeout(timeOutEvent);
+					if (timeOutEvent != 0) { //点击
+						runStop();
+					}
+					return false;
+				}
+			});
+
+			function connect() {
+				if (!device) {
+					console.log('开始连接....');
+					device = iot.device(sdk_device);
+					// 测试上报一条设备标签数据
+					device.on('connect', (res) => {
+						console.log('连接成功....', res)
+					});
+					device.on('error', (err) => {
+						console.log('连接错误,error => ', err);
+					});
+					device.onShadow((res) => {
+						console.log('获取最新设备影子,' + JSON.stringify(res));
+					});
+					device.on('message', (topic, message) => {
+						console.log('来自topic的消息 => ' + topic);
+						console.log('message => ' + message);
+						try {
+							var obj = JSON.parse(message);
+							// console.log(obj.speed)
+							$('#speed').text(obj.speed);
+						} catch (err) {
+							console.log('err => ', err)
+							speed = 0;
+						}
+						// console.log('packet => '+ JSON.stringify(packet));
+					});
+					// 初始化档位
+					localStorage.setItem('$Gear', 'L');
+				}
+			}
+
+			function subscribe() {
+				// 订阅消息
+				device.subscribe(Topic, {
+					qos: 1
+				}, (err, granted) => {
+					console.log('----------------------------------')
+					console.log('Topic=>' + Topic);
+					if (err == null) {
+						console.log("主题订阅成功");
+						console.log("订阅内容 => " + JSON.stringify(granted));
+					} else {
+						console.log("主题订阅失败 => err: " + err);
+					}
+				});
+			}
+
+			function publish(msg) {
+				// 向topic发送消息
+				data = JSON.stringify(msg);
+				device.publish(Topic, data, {
+					qos: 1
+				}, (err) => {
+					console.log('----------------------------------')
+					console.log('Topic=>' + Topic);
+					if (err == null) {
+						console.log("主题发布成功");
+					} else {
+						console.log("主题发布失败 => err: " + err);
+					}
+				});
+			}
+
+			function runStop() {
+				var msg = {
+					run: 0,
+					Gear: localStorage.getItem('$Gear')
+				}
+				// btnL(); // 挡位还原
+				publish(msg);
+			}
+
+			function runTop() {
+				var msg = {
+					run: 1,
+					Gear: localStorage.getItem('$Gear')
+				}
+				publish(msg);
+			}
+
+			function runRight() {
+				var msg = {
+					run: 2,
+					Gear: localStorage.getItem('$Gear')
+				}
+				publish(msg);
+			}
+
+			function runBottom() {
+				var msg = {
+					run: 3,
+					Gear: localStorage.getItem('$Gear')
+				}
+				publish(msg);
+			}
+
+			function runLeft() {
+				var msg = {
+					run: 4,
+					Gear: localStorage.getItem('$Gear')
+				}
+				publish(msg);
+			}
+
+			function btnL() {
+				$('.ring-m').removeClass('active');
+				$('.ring-h').removeClass('active');
+				$('.ring-l').addClass('active');
+				localStorage.setItem('$Gear', 'L');
+			}
+
+			function btnM() {
+				$('.ring-l').removeClass('active');
+				$('.ring-h').removeClass('active');
+				$('.ring-m').addClass('active');
+				localStorage.setItem('$Gear', 'M');
+			}
+
+			function btnH() {
+				$('.ring-l').removeClass('active');
+				$('.ring-m').removeClass('active');
+				$('.ring-h').addClass('active');
+				localStorage.setItem('$Gear', 'H');
+			}
+
+			function setting() {
+				window.location.href = "./setting.html";
+			}
+		</script>
+	</body>
+
+</html>

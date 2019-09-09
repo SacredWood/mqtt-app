@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<meta http-equiv="X-UA-Compatible" content="ie=edge">
+		<title>设备列表</title>
+		<link rel="stylesheet" href="css/reset.css">
+		<link rel="stylesheet" href="css/list.css">
+		<script src="js/jquery-3.4.1.min.js"></script>
+	</head>
+	<body>
+		<div class="header">
+			<h1>设备列表</h1>
+			<img src="img/setting.png" alt="" onclick="setting()">
+		</div>
+		<div class="content">
+			<ul id='device-list'>
+				<!-- 	<li>
+					名字
+					<div class="btn-set">
+						<button class="btn save" onclick="del('1')">删除</button>
+						<button class="btn save" onclick="use('1')">使用</button>
+					</div>
+				</li> -->
+			</ul>
+		</div>
+		<script>
+			create();
+
+			function create() {
+				var obj = JSON.parse(localStorage.getItem('$DeviceList')) || {};
+				for (var key in obj) {
+					let li = $(
+						`<li><span>${key}</span><div class="btn-set"><button class="btn del" onclick="del('${key}')">删除</button><button class="btn save" onclick="use('${key}')">使用</button></div></li>`
+					);
+					$('#device-list').append(li);
+				}
+			}
+
+			function setting() {
+				window.location.href = "./setting.html";
+			}
+
+			function del(key) {
+				let obj = JSON.parse(localStorage.getItem('$DeviceList')) || {};
+				delete obj[key];
+				localStorage.setItem('$DeviceList', JSON.stringify(obj));
+				$('#device-list').empty();
+				create();
+				console.log('clear', '清除成功');
+				alert('清除成功');
+			}
+
+			function use(key) {
+				let obj = JSON.parse(localStorage.getItem('$DeviceList')) || {};
+				obj = obj[key];
+				localStorage.setItem('$ProductKey', obj.ProductKey);
+				localStorage.setItem('$DeviceName', obj.DeviceName);
+				localStorage.setItem('$DeviceSecret', obj.DeviceSecret);
+				localStorage.setItem('$Topic', obj.Topic);
+				window.location.href = "./control.html";
+			}
+		</script>
+	</body>
+</html>
