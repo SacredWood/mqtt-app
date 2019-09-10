@@ -336,8 +336,8 @@
 				if(brake != "brake_off"){
 					var msg = {
 						run: 1,
-						Gear: localStorage.getItem('$Gear'),
-						brake: "brake_on"
+						Gear: localStorage.getItem('$Gear')+"_on",
+						// brake: "brake_on"
 					}
 					publish(msg);
 					localStorage.setItem('$brake', 'brake_off');
@@ -345,8 +345,8 @@
 				}else {
 					var msg = {
 						run: 1,
-						Gear: localStorage.getItem('$Gear'),
-						brake: "brake_off"
+						Gear: localStorage.getItem('$Gear')+"_off",
+						// brake: "brake_off"
 					}
 					publish(msg);
 					localStorage.setItem('$brake', 'brake_on');
