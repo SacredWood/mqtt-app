@@ -258,6 +258,7 @@
 
 			function publish(msg) {
 				// 向topic发送消息
+				// console.log("111")
 				data = JSON.stringify(msg);
 				device.publish(Topic, data, {
 					qos: 1
@@ -277,7 +278,6 @@
 					run: 0,
 					Gear: localStorage.getItem('$Gear')
 				}
-				// btnL(); // 挡位还原
 				publish(msg);
 			}
 
@@ -286,6 +286,7 @@
 					run: 1,
 					Gear: localStorage.getItem('$Gear')
 				}
+				// console.log('11111');
 				publish(msg);
 			}
 
