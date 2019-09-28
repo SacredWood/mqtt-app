@@ -3,8 +3,8 @@
     "id" : "H5C797F23", /*应用的标识*/
     "name" : "MQTTControl", /*应用名称，程序桌面图标名称*/
     "version" : {
-        "name" : "2.2", /*应用版本名称*/
-        "code" : 1
+        "name" : "2.4", /*应用版本名称*/
+        "code" : 2
     },
     "description" : "MQTT控制器,对接阿里云物联网平台", /*应用描述信息*/
     "icons" : {
@@ -182,7 +182,7 @@
                         "spotlight" : "unpackage/res/icons/40x40.png",
                         "spotlight@2x" : "unpackage/res/icons/80x80.png"
                     },
-                    "appstore" : "img/MQTTControl.png"
+                    "appstore" : "unpackage/res/icons/1024x1024.png"
                 },
                 "android" : {
                     "mdpi" : "unpackage/res/icons/48x48.png", /*普通屏程序图标，分辨率：48x48*/
